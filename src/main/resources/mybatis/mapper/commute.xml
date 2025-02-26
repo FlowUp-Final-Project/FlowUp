@@ -63,16 +63,50 @@
    		<result property="worktime_sec" column="worktime_sec" 	javaType="String" />
    	</resultMap>
    	<select id="getWorktime" parameterType="HashMap" resultMap="getWorktimeMap">
-   		select to_char(trunc(starttime+7) , 'w') as weekNo
+   		select to_char(trunc(starttime) , 'iw') as weekNo
 		     , sum(nvl((endtime - starttime), 0) * 24 * 60 * 60) as worktime_sec
 		from tbl_commute
 		where fk_employeeno = ${fk_employeeNo}
 		and to_char(starttime, 'yyyymm') = ${year_month}
-		group by to_char(trunc(starttime+7) , 'w') 	
+		group by to_char(trunc(starttime) , 'iw') 	
 		order by 1
    	</select> 
    	
    	
+   	
+   	
+   	<resultMap type="HashMap" id="getMontWorkInfo_alldayMap">
+   		<result property="startTime" column="startTime" javaType="String" />
+   		<result property="endTime" column="endTime" javaType="String" />
+   		<result property="dt" column="dt" javaType="String" />
+   		<result property="worksec" column="worksec" javaType="String" />
+   		<result property="rest" column="rest" javaType="String" />
+   	</resultMap>
+	<select id="getMontWorkInfo_allday" parameterType="HashMap"  resultMap="getMontWorkInfo_alldayMap">
+		SELECT to_char( b.dt, 'yyyy-mm-dd' ) as dt
+		     , NVL( to_char(starttime, 'hh24:mi:ss') , '00:00:00') as starttime
+		     , NVL( to_char(endtime, 'hh24:mi:ss') , '00:00:00') as endtime
+		     , nvl( trunc((endtime - starttime) * 24 * 60 * 60) , 0) as worksec
+		     , rest
+		FROM 
+		(
+		    SELECT trunc(starttime) as dtt
+		         , starttime
+		         , endtime
+		         , rest
+		    FROM tbl_commute
+		    WHERE fk_employeeno = #{fk_employeeNo}
+		          and to_char(starttime, 'yyyy-mm') = #{year_month}
+		)a 
+		right join
+		( 
+		    SELECT to_date( #{year_month}, 'YYYY-MM') + LEVEL - 1 AS dt
+		    FROM dual 
+		    CONNECT BY LEVEL &lt;= (LAST_DAY( #{year_month}||'-01') - to_date( #{year_month}, 'YYYY-MM')+ 1 )
+		)b
+		on b.dt = a.dtt
+		ORDER BY b.dt
+	</select>
    	
    	
    	

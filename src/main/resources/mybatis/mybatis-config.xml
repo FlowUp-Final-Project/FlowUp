@@ -13,6 +13,7 @@
       <typeAlias type="com.spring.app.schedule.domain.Calendar_small_category_VO" alias="Calendar_small_category_VO"/> 
       <typeAlias type="com.spring.app.board.domain.PostVO" alias="PostVO"/>
       <typeAlias type="com.spring.app.document.domain.DocumentVO" alias="DocumentVO"/>
+      <typeAlias type="com.spring.app.reservation.domain.AssetVO" alias="AssetVO"/>
       <typeAlias type="com.spring.app.mail.domain.MailVO" alias="MailVO"/>
    </typeAliases>
 

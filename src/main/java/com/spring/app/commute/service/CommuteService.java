@@ -3,6 +3,8 @@ package com.spring.app.commute.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.ui.Model;
+
 import com.spring.app.commute.domain.CommuteVO;
 import com.spring.app.employee.domain.DepartmentVO;
 
@@ -34,6 +36,9 @@ public interface CommuteService {
 
 	// 서머리에 출력될 주간 근무시간 가져오기
 	List<Map<String, String>> getWorktime(Map<String, String> paramap);
+
+	
+	void commuteList_to_Excel(Map<String, String> paraMap, Model model);
 
 
 

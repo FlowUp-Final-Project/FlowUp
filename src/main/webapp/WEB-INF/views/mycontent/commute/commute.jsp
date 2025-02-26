@@ -4,6 +4,7 @@
 <%
 String ctxPath = request.getContextPath();
 //     /myspring
+
 %>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -260,6 +261,7 @@ div.hoverDiv:hover {
     	const now = new Date();
     	
     	const currentDate = now.getDate();
+    	
     	const firstDay = new Date(now.setDate(1)).getDay();
     	
     	return Math.ceil((currentDate + firstDay) / 7);
@@ -524,14 +526,10 @@ div.hoverDiv:hover {
 					const worktime_sec = Number(item.worktime_sec)+1;
 					
 					const weekWorktime = secToHour(worktime_sec);
+
+					
+					const todayWeekNo = String(new Date().getWeek()).padStart(2, '0');
 				
-					const todayWeekNo = today_week();
-					
-					console.log("~~ 확인용 todayWeekNo : " + todayWeekNo);
-					console.log("~~ 확인용 item.weekNo : " + item.weekNo);
-					console.log("~~ 확인용 weekWorktime : " + weekWorktime);
-					
-					
 					if(item.weekNo == todayWeekNo ) {
 						
 						$("div#thisWeekWorktime").html(weekWorktime);
@@ -555,22 +553,11 @@ div.hoverDiv:hover {
 					
 				});
 				
-		
-				
 				const monthWorktime = secToHour(total_sec);
 				
 				$("div#thisMonthWorktime").html(monthWorktime);
 				
-				
-				
-				
-			
-				
-				
-				
-				
-				
-				
+					
 			},
 			error: function(request, status, error){
 		        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
@@ -581,6 +568,35 @@ div.hoverDiv:hover {
     	
     	
     }
+    
+    Date.prototype.getWeek = function (dowOffset) {
+    	  /*getWeek() was developed by Nick Baicoianu at MeanFreePath: http://www.meanfreepath.com */
+
+    	  dowOffset = typeof(dowOffset) == 'number' ? dowOffset : 0; // dowOffset이 숫자면 넣고 아니면 0
+    	  var newYear = new Date(this.getFullYear(),0,1);
+    	  var day = newYear.getDay() - dowOffset; //the day of week the year begins on
+    	  day = (day >= 0 ? day : day + 7);
+    	  var daynum = Math.floor((this.getTime() - newYear.getTime() -
+    	    (this.getTimezoneOffset()-newYear.getTimezoneOffset())*60000)/86400000) + 1;
+    	  var weeknum;
+    	  //if the year starts before the middle of a week
+    	  if(day < 4) {
+    	    weeknum = Math.floor((daynum+day-1)/7) + 1;
+    	    if(weeknum > 52) {
+    	      let nYear = new Date(this.getFullYear() + 1,0,1);
+    	      let nday = nYear.getDay() - dowOffset;
+    	      nday = nday >= 0 ? nday : nday + 7;
+    	      /*if the next year starts before the middle of
+    	        the week, it is week #1 of that year*/
+    	      weeknum = nday < 4 ? 1 : 53;
+    	    }
+    	  }
+    	  else {
+    	    weeknum = Math.floor((daynum+day-1)/7);
+    	  }
+    	  return weeknum;
+    	};
+    	
     	
     	
 	function secToHour(total_sec) {
@@ -607,7 +623,23 @@ div.hoverDiv:hover {
     
     
     
-    
+    function downloadExcel() {
+    	
+		const frm = document.downloadExcelForm;
+			
+		const year_month = $('#today').html();
+		
+		frm.year_month.value = year_month;
+		frm.fk_employeeNo.value = '${sessionScope.loginuser.employeeNo}';
+		
+		
+		console.log(frm.fk_employeeNo.value);
+		
+		frm.method = "post";
+		frm.action = "<%=ctxPath%>/commute/downloadExcel";
+		frm.submit();
+		
+    }
 
     
     
@@ -667,7 +699,7 @@ div.hoverDiv:hover {
 				</div>
 				<div style="margin:0 0 0 auto;">
 					<button type="button" class="btn btn-outline-secondary btn-sm mr-1" id="overtime" name="overtime" onclick="">연장근무신청</button>
-					<button type="button" class="btn btn-outline-secondary btn-sm " id="download" name="download" onclick="">엑셀다운로드</button>
+					<button type="button" class="btn btn-outline-secondary btn-sm " id="download" name="download" onclick="downloadExcel()">엑셀다운로드</button>
 				</div>
 			</div>
 			
@@ -718,5 +750,10 @@ div.hoverDiv:hover {
 	</div>
 
 </div>
+
+<form name="downloadExcelForm">
+	<input type="hidden" name="year_month" value="">
+	<input type="hidden" name="fk_employeeNo" value="">
+</form>
 
 <jsp:include page="../../footer/footer.jsp" />

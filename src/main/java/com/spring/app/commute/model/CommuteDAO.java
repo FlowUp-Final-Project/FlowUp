@@ -33,6 +33,8 @@ public interface CommuteDAO {
 
 	List<Map<String, String>> getWorktime(Map<String, String> paramap);
 
+	List<Map<String, String>> getMontWorkInfo_allday(Map<String, String> paraMap);
+
 
 
 }

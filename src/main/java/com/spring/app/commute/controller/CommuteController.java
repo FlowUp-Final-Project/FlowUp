@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,37 +46,24 @@ public class CommuteController {
 		
 		if (loginuser == null) {
 
-			EmployeeVO evo = new EmployeeVO();
-			evo.setEmployeeNo("100010");
-			evo.setFK_positionNo("100000");
-			evo.setFK_teamNo("100000");
-			evo.setName("윤영주");
-			evo.setSecurityLevel("10");
-			evo.setEmail("mechanicon@naver.com");
-			evo.setMobile("01082487243");
-			evo.setDirectCall("01082487243");
-			evo.setBank("국민은행");
-			evo.setAccount("43340201215074");
-			evo.setRegisterDate("2025-02-11");
-			evo.setStatus("1");
-			evo.setFK_departmentNo("100000");
-			evo.setDepartmentName("가상의 부서~~");
-			
-			session.setAttribute("loginuser", evo);
+			mav.setViewName("mycontent/employee/login");
 
 		}
-		
-		List<DepartmentVO> dvoList = new ArrayList<>();;
-		
-		if("10".equals(loginuser.getSecurityLevel())) {
+		else {
 			
-			dvoList = service.getDepInfo(); // 모든 부서 리스트 조회
+			List<DepartmentVO> dvoList = new ArrayList<>();;
+			
+			if("10".equals(loginuser.getSecurityLevel())) {
+				
+				dvoList = service.getDepInfo(); // 모든 부서 리스트 조회
+				
+			}
+
+			mav.addObject("dvoList", dvoList);
+			
+			mav.setViewName("mycontent/commute/commute");
 			
 		}
-
-		mav.addObject("dvoList", dvoList);
-		
-		mav.setViewName("mycontent/commute/commute");
 		
 		return mav;
 	}
@@ -253,17 +241,35 @@ public class CommuteController {
 		
 		List<Map<String, String>> mapList = service.getWorktime(paramap);
 		
-		
-		
-		
-		
 		return mapList;
-		
 	}
 	
 	
-	
-	
+	@PostMapping("downloadExcel")
+	public String downloadExcelFile(@RequestParam(defaultValue = "") String year_month, @RequestParam(defaultValue = "") String fk_employeeNo, Model model) {
+
+		if(fk_employeeNo == null || "".equals(fk_employeeNo.trim())) {
+			System.out.println("로그인 안한것 같은데..?");
+			
+		}
+		if (year_month == null || "".equals(year_month.trim())) {
+			System.out.println("조회 날짜가 없는거 이상한데..?");
+		}
+		
+		
+		System.out.println("확인용 : fk_employeeNo " + fk_employeeNo);
+
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("fk_employeeNo", fk_employeeNo);
+		paraMap.put("year_month", year_month);
+		
+		
+		
+		
+		service.commuteList_to_Excel(paraMap, model);
+
+		return "excelDownloadView"; // "excelDownloadView"은 ViewConfiguration의 19번째줄 메소드 이름이다..
+	}
 	
 	
 	
