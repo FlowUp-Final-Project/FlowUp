@@ -7,6 +7,7 @@
 %>      
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <script src="<%=ctxPath%>/js/util.js"></script>
    
 <style>
@@ -260,6 +261,11 @@
 	    $('#btn_depCommute').click(e=>{
 	    	$('#btn_depCommute_list').slideToggle();
 	    });
+		
+	 // 부서 근태 관리 버튼 클릭시 열림
+	    $('#btn_allCommute').click(e=>{
+	    	$('#btn_allCommute_list').slideToggle();
+	    });
 	    
 	    
 		
@@ -368,40 +374,68 @@
 	    });
 	  
     
-	    
+	    // 내 근태현황
 	    $("#myCommuteTable").click(e=>{
 	    	
 	    	location.href="<%= ctxPath%>/commute/";
 	    	
 	    });
 	    
-		$("#myCommuteChart").click(e=>{
+	    // 내 연차내역
+		$("#myAnnualInfo").click(e=>{
 	    	
 			location.href="<%= ctxPath%>/commute/myAnnual";
 			
 	    });
  		
-		$("div.deptCommuteTable").click(e=>{
-		    	
-			const $btn = $(e.target);
-		    	
-		});
-		  
 		
-	 	$("div.deptCommuteChart").click(e=>{
+		// 부서 근태현황
+		$(document).on('click', "div.deptCommuteTable", e=>{
+			
+			const departmentNo = $(e.target).parent().find("input").val();
+
+			location.href=`<%= ctxPath%>/commute/commuteTable?departmentNo=\${departmentNo}`;
+			
+		});
+		
+		// 부서 근태통계
+		$(document).on('click', "div.deptCommuteChart", e=>{
+			
+			const departmentNo = $(e.target).parent().find("input").val();
+
+			location.href=`<%= ctxPath%>/commute/commuteChart?departmentNo=\${departmentNo}`;
+			
+		});
+		
+		
+		
+	 	
+	 	
+		// 전사 근태현황
+	 	$("#allCommuteTable").click(e=>{
+	    	
+	 		location.href=`<%= ctxPath%>/commute/commuteTable?departmentNo=all`;
 		    	
-			const $btn = $(e.target);
+		});
+		
+	 	// 전사 근태통계
+	 	$("#allCommuteChart").click(e=>{
+	 		
+	 		location.href=`<%= ctxPath%>/commute/commuteChart?departmentNo=all`;
+		    	
+		});
+	 	
+	 // 전사 연차현황
+	 	$("#allAnnualInfo").click(e=>{
+	 		
+	 		location.href=`<%= ctxPath%>/commute/annualInfo`;
 		    	
 		});
  		
  		
+	 	getDeptname();
  		
  		
- 		
- 		
- 		
- 		
-	    
 	}); // ready
 	
 	
@@ -419,16 +453,11 @@
 				let todayStartTime;
 				let todayEndTime;
 				
-				console.log(json.startTime);
-				console.log(json.endTime);
-				
 				if(json.startTime != "-") {
-					console.log("startTime");
 					todayStartTime = (json.startTime).substring(11);
 				}
 				
 				if(json.endTime != "-") {
-					console.log("endTime");
 					todayEndTime = (json.endTime).substring(11);
 				}
 				
@@ -491,7 +520,54 @@
 		
 	}// function getTodayWorkInfo()
 	
-	
+	function getDeptname() {
+		
+		
+		let html = ``;
+		
+		if(${sessionScope.loginuser.securityLevel == "10"}) {
+			
+			$.ajax({
+				url:"<%= ctxPath%>/commute/getDeptname",
+				type:"get",
+				async:false,
+				data:{"fk_employeeNo":"${sessionScope.loginuser.employeeNo}"},
+				dataType:"json",
+				success:function(json) {
+					
+					$.each(json, (index,item)=>{
+						
+						html += `<div style="margin-bottom:10px;">
+			            			<div>&nbsp;&nbsp;&nbsp;\${item.departmentName}</div>
+				            		<div class="deptCommuteTable hhover">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;부서 근태현황</div>
+				            		<div class="deptCommuteChart hhover">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;부서 근태통계</div>
+				            		<input type="hidden" value="\${item.departmentNo}" />
+			            		</div>`;
+						
+					});
+					
+				},
+				error: function(request, status, error){
+			        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
+			    }
+			});
+		}
+		else {
+			
+			html += `<div>
+			        	<div>&nbsp;&nbsp;&nbsp;\${sessionScope.loginuser.departmentName}</div>
+			        	<div class="deptCommuteTable hhover">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;부서 근태현황</div>
+			        	<div class="deptCommuteChart hhover">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;부서 근태통계</div>
+			        	<input type="hidden" value="" />
+					</div>`;
+		}
+		
+		
+		
+		$("div#btn_depCommute_list").html(html);
+		
+		
+	}
 
 	
 	
@@ -554,54 +630,39 @@
             
             <br>
             
-            <div>
-	         	<div id="btn_myCommute" class="hhover" style="font-size:14pt; font-weigt:bold;">근태관리</div>
+            <div style="margin-top:5px;">
+	         	<div id="btn_myCommute" class="hhover" style="font-size:14pt; font-weight: bold;">내 근태관리</div>
 	            <div id="btn_myCommute_list" style="list-style: none; display: none;">
-            		<div id="myCommuteTable" class="hhover">&nbsp;&nbsp;&nbsp;내 근태 현황</div>
-            		<div id="myCommuteChart" class="hhover">&nbsp;&nbsp;&nbsp;내 연차 내역</div>
+            		<div id="myCommuteTable" class="hhover">&nbsp;&nbsp;&nbsp;내 근태현황</div>
+            		<div id="myAnnualInfo" class="hhover">&nbsp;&nbsp;&nbsp;내 연차내역</div>
             	</div>
             </div>
             
-            <div style="margin-top:5px;">
+            <div style="margin-top:10px;">
             
-            	<c:if test="${sessionScope.loginuser.departmentName != ' ' || sessionScope.loginuser.securityLevel == '10'}">
-            	
-		         	<div id="btn_depCommute" class="hhover" style="font-size:14pt; font-weigt:bold;">부서 근태관리</div>
+            		<div id="btn_depCommute" class="hhover" style="font-size:14pt; font-weight: bold;">부서 근태관리</div>
 		         	
-		            <div id="btn_depCommute_list" style="list-style: none; display: none;">
+		            <div id="btn_depCommute_list" style="list-style: none; display: none;"></div>
 		            
-		            	<c:if test="${sessionScope.loginuser.securityLevel == '10'}">
-		            	
-		            		<c:forEach items="${requestScope.dvoList}" var="dvo">
-		            			
-			            		<div style="margin-bottom:10px;">
-			            			<div>${dvo.departmentName}</div>
-				            		<div class="deptCommuteTable hhover">&nbsp;&nbsp;&nbsp;부서 근태현황</div>
-				            		<div class="deptCommuteChart hhover">&nbsp;&nbsp;&nbsp;부서 근태통계</div>
-				            		<input type="hidden" value="${dvo.departmentNo}" />
-			            		</div>
-			            		
-		            		</c:forEach>
-			            	
-	            		</c:if>
-	            		
-	            		<c:if test="${sessionScope.loginuser.securityLevel != '10'}">
-		            		
-		            		<div>
-				            	<div>${sessionScope.loginuser.departmentName}</div>
-				            	<div class="deptCommuteTable hhover">&nbsp;&nbsp;&nbsp;부서 근태현황</div>
-				            	<div class="deptCommuteChart hhover">&nbsp;&nbsp;&nbsp;부서 근태통계</div>
-				            	<input type="hidden" value="" />
-		            		</div>
-		            		
-	            		</c:if>
-	            		
-	            		
-	            	</div>
+		    </div>
+            
+            <c:if test="${sessionScope.loginuser.securityLevel == '10'}">
             	
-            	</c:if>
+            	<div style="margin-top:10px;">
+            
+            		<div id="btn_allCommute" class="hhover" style="font-size:14pt; font-weight: bold;">전사 근태관리</div>
+		         	
+		            <div id="btn_allCommute_list" style="list-style: none; display: none;">
+			            <div id="allCommuteTable" class="hhover">&nbsp;&nbsp;&nbsp;전사 근태현황</div>
+	            		<div id="allCommuteChart" class="hhover">&nbsp;&nbsp;&nbsp;전사 근태통계</div>
+	            		<div id="allAnnualInfo" class="hhover">&nbsp;&nbsp;&nbsp;전사 연차현황</div>
+            		</div>
+		            
+		    	</div>
+		         	
+            </c:if>
             	
-            </div>
+            
             
         </div>
     </div>

@@ -112,7 +112,6 @@
    	<resultMap type="HashMap" id="getEmployeeInfoMap">
    		<result property="positionName" column="positionName" javaType="String" />
    		<result property="name" column="name" javaType="String" />
-
    	</resultMap>
    	<select id="getEmployeeInfo" parameterType="String" resultMap="getEmployeeInfoMap">
    		select P.positionName as positionName, name
@@ -124,7 +123,36 @@
    	<select id="getAnnualInfo" parameterType="HashMap" resultType="AnnualVO">
    		select annualNo, year, occurAnnual, overAnnual, addAnnual, usedAnnual
    		from tbl_annual
-   		where fk_employeeNo = #{fk_employeeNo} and year = '2025'
+   		where fk_employeeNo = #{fk_employeeNo} and year = #{year}
+   	</select>
+   	
+   	<select id="getUsedAnnual" parameterType="HashMap" resultType="String">
+   		select sum(useamount) as usedannual
+		from tbl_document D join tbl_draft_annual A
+		on D.DOCUMENTNO = A.DOCUMENTNO
+		where fk_employeeno = #{fk_employeeNo}
+		and to_char(startdate, 'yyyy') = #{year}
+		group by to_char(startdate, 'yyyy')
+   	</select>
+   	
+   	<resultMap type="HashMap" id="getUsedAnnualListMap">
+   		<result property="userange" column="userange" javaType="String" />
+   		<result property="useamount" column="useamount" javaType="String" />
+   		<result property="reason" column="reason" javaType="String" />
+   	</resultMap>
+   	<select id="getUsedAnnualList" parameterType="HashMap" resultMap="getUsedAnnualListMap">
+   		select to_char(startdate, 'mm/dd')|| ' - ' ||to_char(enddate, 'mm/dd') as userange, useamount, reason
+		from tbl_document D join tbl_draft_annual A
+		on D.DOCUMENTNO = A.DOCUMENTNO
+		where D.fk_employeeno = #{fk_employeeNo} and to_char(startdate, 'yyyy') = #{year}
+		order by startdate asc 
+   	</select>
+   	
+   	<select id="getWorkYear" parameterType="String" resultType="String">
+   		select year
+   		from tbl_annual
+   		where fk_employeeNo = #{fk_employeeNo}
+   		order by year desc
    	</select>
    	
    	

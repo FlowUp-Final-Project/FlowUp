@@ -99,7 +99,7 @@ table {
 
 table tr th, .info {
 	height: var(--size30);
-	font-weight: normal;
+	font-weight: bold;
 	text-align: center;
 }
 
@@ -154,22 +154,129 @@ div.hoverDiv:hover {
 		const timeString = year+"."+month+"."+day+" ("+dayOfWeek+")";
 		
 		$('#today').text(timeString);
-	});
+
+		getworkyear();
+		
+		
+		
+		$("select#useYear").change(e=>{
+			
+			getUsedAnnualList();
+			
+		}); // change event
+		
+		
+		
+		
+	}); // ready
   
+	
+	
+	function getworkyear() {
+		
+		$.ajax({
+    		url:"<%=ctxPath%>/commute/getWorkYear",
+			type:"get",
+			data:{"fk_employeeNo":"${sessionScope.loginuser.employeeNo}"},
+			async:false,
+			dataType:"json",
+			success:function(json) {
+				
+				let html = ``;
+				$.each(json, (index,item)=>{
+					
+					html += `<option value="\${item}">\${item}년</option>`;
+					
+				});
+				
+				$("select#useYear").html(html);
+				
+			},
+			error: function(request, status, error){
+		        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
+		    }
+    		
+    	}); // ajax
+		
+		getUsedAnnualList();
+    	
+	}//
+	
+	
+	
+	function getUsedAnnualList() {
+		
+		const year = $("select#useYear").val();
+		
+		console.log("year :: ??? " + year);
+		
+		$.ajax({
+    		url:"<%=ctxPath%>/commute/getUsedAnnualList",
+			type:"get",
+			data:{"fk_employeeNo":"${sessionScope.loginuser.employeeNo}"
+				 ,"year":year},
+			dataType:"json",
+			success:function(json) {
+				
+				html = ``;
+				
+				if(json.length == 0) {
+					html += `<tr>
+								<td colspan="3" style="text-align: center;">데이터가 없습니다.</td>
+							</tr>`;
+				}
+				else {
+					
+					$.each(json, (index,item)=>{
+						
+						html += `<tr>
+									<td style="text-align: center;">\${item.userange}</td>
+									<td style="text-align: center;">\${item.useamount}</td>
+									<td style="text-align: center;">\${item.reason}</td>
+								</tr>`;
+								
+					});		
+							
+				}
+				
+				$("tbody#useInfo").html(html);
+				
+			},
+			error: function(request, status, error){
+		        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
+		    }
+    		
+    	}); // ajax
+		
+	} //
+	
+	
+	
+	
+	
+	
+	
+	
     
 </script>
 <div style="display: flex;">
 
 	<div
-		style="width: var(--size250);; height: 100vh; border-right: solid 1px #000;">
+		style="width: var(--size250);; height: 100vh; border-right: solid 1px #000; flex-shrink: 0;">
 
 		<jsp:include page="../../common/commute_btn.jsp" />
 	</div>
 	
-	<div style="width: 100%; padding: 5px;">
+	<div style="width: 100%; padding: 20px;">
+	
+		<div class="ml-1 mr-1 mb-5">
+			
+			<div style="font-size:14pt;">내 연차내역</div>
+			
+		</div>
 	
 		<div class="dateController" style="margin-bottom: 50px;">
-			<div class="" style="width: 200px; margin: 20px auto;">
+			<div class="" style="width: 200px; margin: 0 auto;">
 				<div id="today" style="text-align: center; font-size:20px;">today</div>
 			</div>
 		</div>
@@ -179,7 +286,7 @@ div.hoverDiv:hover {
 			<div style="display: flex; height: 120px; align-items: center;">
 			
 					<div style="align-items: center; width: 20%;">
-						<div style="text-align: center;  width: 100%;">${requestScope.map.positionName}&nbsp;${requestScope.map.name}</div>
+						<div style="text-align: center;  width: 100%; font-size:14pt;">${requestScope.map.positionName}&nbsp;${requestScope.map.name}</div>
 					</div>
 					
 					<div style="height: 120px; width: 3px;">
@@ -187,7 +294,7 @@ div.hoverDiv:hover {
 					</div>
 				
 					<div style="align-items: center; width: 10%;">
-						<div style="text-align: center;  width: 100%; margin-bottom: 10px;">발생 연차</div>
+						<div style="text-align: center;  width: 100%; margin-bottom: 10px; color:grey;">발생 연차</div>
 						<div style="text-align: center;  width: 100%;">${requestScope.avo.occurAnnual}</div>
 					</div>
 					
@@ -196,7 +303,7 @@ div.hoverDiv:hover {
 					</div>
 					
 					<div style="align-items: center; width: 10%;">
-						<div style="text-align: center;  width: 100%; margin-bottom: 10px;">이월 연차</div>
+						<div style="text-align: center;  width: 100%; margin-bottom: 10px; color:grey;" >이월 연차</div>
 						<div style="text-align: center;  width: 100%;">${requestScope.avo.overAnnual}</div>
 					</div>
 					
@@ -205,7 +312,7 @@ div.hoverDiv:hover {
 					</div>
 					
 					<div style="align-items: center; width: 10%;">
-						<div style="text-align: center;  width: 100%; margin-bottom: 10px;">조정 연차</div>
+						<div style="text-align: center;  width: 100%; margin-bottom: 10px; color:grey;">조정 연차</div>
 						<div style="text-align: center;  width: 100%;">${requestScope.avo.addAnnual}</div>
 					</div>
 				
@@ -215,7 +322,7 @@ div.hoverDiv:hover {
 				
 				
 					<div style="align-items: center; width: 10%;">
-						<div style="text-align: center;  width: 100%; margin-bottom: 10px; color:#2985DB; font-weight: bold">총 연차</div>
+						<div style="text-align: center;  width: 100%; margin-bottom: 10px; color:#2985DB; font-weight: bold;">총 연차</div>
 						<div style="text-align: center;  width: 100%;">${requestScope.avo.totalAnnual}</div>
 					</div>
 					
@@ -224,7 +331,7 @@ div.hoverDiv:hover {
 					</div>
 					
 					<div style="align-items: center; width: 10%;">
-						<div style="text-align: center;  width: 100%; margin-bottom: 10px; color:#2985DB; font-weight: bold">사용 연차</div>
+						<div style="text-align: center;  width: 100%; margin-bottom: 10px; color:#2985DB; font-weight: bold;">사용 연차</div>
 						<div style="text-align: center;  width: 100%;">${requestScope.avo.usedAnnual}</div>
 					</div>
 					
@@ -233,7 +340,7 @@ div.hoverDiv:hover {
 					</div>
 					
 					<div style="align-items: center; width: 10%;">
-						<div style="text-align: center;  width: 100%; margin-bottom: 10px; color:#2985DB; font-weight: bold">잔여 연차</div>
+						<div style="text-align: center;  width: 100%; margin-bottom: 10px; color:#2985DB; font-weight: bold;">잔여 연차</div>
 						<div style="text-align: center;  width: 100%;">${requestScope.avo.remainderAnnual}</div>
 					</div>
 				
@@ -241,31 +348,27 @@ div.hoverDiv:hover {
 	
 		</div>
 	
-		<div class="ml-3 mr-3 mb-3">
+		<div class="ml-3 mr-3 mb-5">
 	
 			<label for="useYear">연차 사용기간 : </label>
-			<select id="useYear" name="useYear">
-				<option value="2025">2025년</option>
-	      		<option value="2024">2024년</option>
-				<option value="2023">2023년</option>
-				<option value="2022">2022년</option>
-				<option value="2021">2021년</option>
-			</select>
+			<select id="useYear" name="useYear"></select>
 		</div>
 	
-		<div class="ml-3 mr-3 mb-3">
-			<div style="font-size:16pt;">사용 내역</div>
+		<div class="ml-1 mr-1 mb-5">
+			<div style="font-size:16pt; margin-bottom: 10px; margin-left: 10px;">사용 내역</div>
 			
-			<table>
-				<thead>
+			<table class="table table-striped table-hover">
+				<thead class="thead text-center" style="font-size:14pt; color:#2985DB; ">
 					<tr>
-						<th>연차사용기간</th>
+						<th>연차 사용기간</th>
 						<th>사용 연차</th>
 						<th>사유</th>
 					</tr>
 				</thead>
 				
-				<tbody></tbody>
+				<tbody id="useInfo">
+				</tbody>
+				
 			</table>
 		</div>
 	

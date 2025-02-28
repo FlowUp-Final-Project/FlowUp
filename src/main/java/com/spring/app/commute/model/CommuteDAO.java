@@ -41,6 +41,12 @@ public interface CommuteDAO {
 
 	AnnualVO getAnnualInfo(Map<String, String> paramap);
 
+	String getUsedAnnual(Map<String, String> paramap);
+
+	List<Map<String, String>> getUsedAnnualList(Map<String, String> paraMap);
+
+	List<String> getWorkYear(String fk_employeeNo);
+
 
 
 }

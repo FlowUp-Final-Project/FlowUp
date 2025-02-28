@@ -55,23 +55,26 @@ public class CommuteController {
 
 		}
 		else {
-			
-			List<DepartmentVO> dvoList = new ArrayList<>();;
-			
-			if("10".equals(loginuser.getSecurityLevel())) {
-				
-				dvoList = service.getDepInfo(); // 모든 부서 리스트 조회
-				
-			}
-
-			mav.addObject("dvoList", dvoList);
-			
+		
 			mav.setViewName("mycontent/commute/commute");
 			
 		}
 		
 		return mav;
 	}
+	
+	@GetMapping("getDeptname")
+	@ResponseBody
+	public List<DepartmentVO> getDeptname() {
+		
+		List<DepartmentVO> dvoList = service.getDepInfo(); // 모든 부서 리스트 조회
+		
+		return dvoList;
+	}
+	
+	
+	
+	
 	
 	
 	
@@ -312,16 +315,83 @@ public class CommuteController {
 		
 		
 		
+	@GetMapping("getUsedAnnualList")
+	@ResponseBody
+	public List<Map<String, String>> getUsedAnnualList(@RequestParam Map<String, String> paraMap) {
+		
+		List<Map<String, String>> mapList = service.getUsedAnnualList(paraMap);
+		
+		return mapList;
+	}
 		
 		
+	@GetMapping("getWorkYear")
+	@ResponseBody
+	public List<String> getWorkYear(@RequestParam(defaultValue = "") String fk_employeeNo) {
 		
+		System.out.println("확인용 fk_employeeNo : "+fk_employeeNo);
+		
+		List<String> yearList = service.getWorkYear(fk_employeeNo);
+		
+		return yearList;
+	}
+		
+	
+	@GetMapping("commuteTable")
+	public ModelAndView commuteTable(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) {
+		
+		String departmentNo = request.getParameter("departmentNo");
 
+		
+	
+		mav.addObject("departmentNo", departmentNo);
+		mav.setViewName("mycontent/commute/commuteTable");
+			
+
+		
+		return mav;
+	}
 	
 	
 	
 	
 	
 	
+	
+	
+	@GetMapping("commuteChart")
+	public ModelAndView commuteChart(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) {
+		
+		String departmentNo = request.getParameter("departmentNo");
+
+		
+	
+		mav.addObject("departmentNo", departmentNo);
+		mav.setViewName("mycontent/commute/commuteChart");
+			
+
+		
+		return mav;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	@GetMapping("annualInfo")
+	public ModelAndView annualInfo(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) {
+		
+		
+		
+		mav.setViewName("mycontent/commute/annualInfo");
+			
+
+		
+		return mav;
+	}
 	
 	
 	
